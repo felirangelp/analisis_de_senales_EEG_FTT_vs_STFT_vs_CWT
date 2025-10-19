@@ -346,30 +346,114 @@ class EEGAnalyzer:
         # Actualizar layout
         fig.update_layout(
             title={
-                'text': 'Análisis Comparativo de Señales EEG: FFT vs STFT vs CWT',
+                'text': 'Análisis Comparativo de Señales EEG: FFT vs STFT vs CWT<br><sub>Interpretación: FFT muestra contenido frecuencial promedio, STFT resolución temporal fija, CWT resolución adaptativa</sub>',
                 'x': 0.5,
                 'xanchor': 'center',
                 'font': {'size': 20}
             },
-            height=400 * len(self.results),
+            height=500 * len(self.results),
             showlegend=False,
             template='plotly_dark',
             font=dict(family="Arial", size=12)
         )
         
-        # Actualizar ejes
+        # Actualizar ejes y agregar anotaciones explicativas
         for i in range(len(self.results)):
-            # FFT
+            signal_name = list(self.results.keys())[i]
+            results = self.results[signal_name]
+            
+            # FFT - Agregar anotaciones
             fig.update_xaxes(title_text="Frecuencia (Hz)", row=i+1, col=1)
             fig.update_yaxes(title_text="Magnitud", row=i+1, col=1)
             
-            # STFT
+            # Anotación para FFT
+            fft_data = results['fft']
+            max_mag = np.max(fft_data['magnitude'])
+            max_freq = fft_data['frequencies'][np.argmax(fft_data['magnitude'])]
+            
+            fig.add_annotation(
+                x=max_freq,
+                y=max_mag * 0.8,
+                text=f"<b>FFT:</b><br>• Identifica componentes<br>frecuenciales dominantes<br>• Sin resolución temporal<br>• Picos en: {', '.join([f'{freq:.1f}' for freq in fft_data['peak_freqs'][:3]])} Hz",
+                showarrow=True,
+                arrowhead=2,
+                arrowcolor="white",
+                bgcolor="rgba(0,0,0,0.7)",
+                bordercolor="white",
+                font=dict(color="white", size=10),
+                row=i+1, col=1
+            )
+            
+            # STFT - Agregar anotaciones
             fig.update_xaxes(title_text="Tiempo (s)", row=i+1, col=2)
             fig.update_yaxes(title_text="Frecuencia (Hz)", row=i+1, col=2)
             
-            # CWT
+            stft_data = results['stft']
+            fig.add_annotation(
+                x=stft_data['times'][len(stft_data['times'])//2],
+                y=stft_data['frequencies'][-1] * 0.8,
+                text=f"<b>STFT:</b><br>• Resolución temporal fija<br>• Ventana: {stft_data['window_length']/results['fs']:.1f}s<br>• Ideal para eventos<br>transitorios",
+                showarrow=True,
+                arrowhead=2,
+                arrowcolor="white",
+                bgcolor="rgba(0,0,0,0.7)",
+                bordercolor="white",
+                font=dict(color="white", size=10),
+                row=i+1, col=2
+            )
+            
+            # CWT - Agregar anotaciones
             fig.update_xaxes(title_text="Tiempo (s)", row=i+1, col=3)
             fig.update_yaxes(title_text="Frecuencia (Hz)", row=i+1, col=3)
+            
+            cwt_data = results['cwt']
+            fig.add_annotation(
+                x=len(cwt_data['magnitude'][0]) / fs / 2,
+                y=cwt_data['frequencies'][-1] * 0.8,
+                text=f"<b>CWT:</b><br>• Resolución adaptativa<br>• Wavelet: {cwt_data['wavelet']}<br>• Mejor para múltiples<br>bandas EEG simultáneas",
+                showarrow=True,
+                arrowhead=2,
+                arrowcolor="white",
+                bgcolor="rgba(0,0,0,0.7)",
+                bordercolor="white",
+                font=dict(color="white", size=10),
+                row=i+1, col=3
+            )
+        
+        # Agregar leyenda de colores
+        fig.add_annotation(
+            x=0.02,
+            y=0.98,
+            xref="paper",
+            yref="paper",
+            text="<b>Leyenda de Colores:</b><br>🔵 Azul oscuro: Baja energía<br>🟡 Amarillo: Alta energía<br>🔴 Puntos rojos: Picos FFT",
+            showarrow=False,
+            bgcolor="rgba(0,0,0,0.8)",
+            bordercolor="white",
+            font=dict(color="white", size=11),
+            align="left"
+        )
+        
+        # Agregar información de rendimiento
+        performance_text = "<b>Rendimiento:</b><br>"
+        for signal_name, results in self.results.items():
+            fft_time = results['fft']['processing_time']
+            stft_time = results['stft']['processing_time']
+            cwt_time = results['cwt']['processing_time']
+            performance_text += f"• {signal_name}: CWT {cwt_time/fft_time:.0f}x más lento que FFT<br>"
+        
+        fig.add_annotation(
+            x=0.98,
+            y=0.98,
+            xref="paper",
+            yref="paper",
+            text=performance_text,
+            showarrow=False,
+            bgcolor="rgba(0,0,0,0.8)",
+            bordercolor="white",
+            font=dict(color="white", size=11),
+            align="right"
+        )
         
         # Guardar dashboard
         dashboard_path = 'dashboard.html'
