@@ -731,12 +731,11 @@ class EEGAnalyzer:
         }}
         
         .color-guide {{
-            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            background: #e74c3c;
             color: white;
             padding: 25px;
             border-radius: 15px;
             margin-top: 30px;
-            box-shadow: 0 8px 25px rgba(231, 76, 60, 0.3);
         }}
         
         .color-guide-title {{
@@ -751,31 +750,11 @@ class EEGAnalyzer:
         }}
         
         .color-item {{
-            background: rgba(255, 255, 255, 0.2);
+            background: #f0625a;
             padding: 15px;
             border-radius: 10px;
-            backdrop-filter: blur(10px);
-            border-left: 5px solid;
-        }}
-        
-        .color-item:nth-child(1) {{
-            border-left-color: #2c3e50;
-        }}
-        
-        .color-item:nth-child(2) {{
-            border-left-color: #f1c40f;
-        }}
-        
-        .color-item:nth-child(3) {{
-            border-left-color: #e74c3c;
-        }}
-        
-        .color-item:nth-child(4) {{
-            border-left-color: #27ae60;
-        }}
-        
-        .color-item:nth-child(5) {{
-            border-left-color: #8e44ad;
+            margin-bottom: 10px;
+            color: white;
         }}
         
         @media (max-width: 768px) {{
