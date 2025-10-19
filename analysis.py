@@ -538,7 +538,7 @@ class EEGAnalyzer:
 <head>
     <meta charset="utf-8">
     <title>Análisis EEG: FFT vs STFT vs CWT</title>
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
     <style>
         body {{
             font-family: Arial, sans-serif;
@@ -688,7 +688,9 @@ class EEGAnalyzer:
             // Redimensionar gráficas si es necesario
             if (tabName === 'graphs') {{
                 setTimeout(() => {{
-                    window.dispatchEvent(new Event('resize'));
+                    if (window.Plotly) {{
+                        window.Plotly.Plots.resize('graphs');
+                    }}
                 }}, 100);
             }}
         }}
@@ -696,7 +698,9 @@ class EEGAnalyzer:
         // Redimensionar gráficas cuando cambie el tamaño de la ventana
         window.addEventListener('resize', function() {{
             if (document.getElementById('graphs').classList.contains('active')) {{
-                window.dispatchEvent(new Event('resize'));
+                if (window.Plotly) {{
+                    window.Plotly.Plots.resize('graphs');
+                }}
             }}
         }});
     </script>
