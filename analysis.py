@@ -422,13 +422,13 @@ class EEGAnalyzer:
                 'text': 'Análisis Interpretativo: FFT vs STFT vs CWT<br><sub>¿Qué contenido en frecuencia identifica cada transformada?</sub>',
                 'x': 0.5,
                 'xanchor': 'center',
-                'font': {'size': 20}
+                'font': {'size': 20, 'color': 'white'}
             },
             height=1000,
             template='plotly_dark',
-            font=dict(family="Arial", size=12),
-            plot_bgcolor='rgba(0,0,0,0)',
-            paper_bgcolor='rgba(0,0,0,0)',
+            font=dict(family="Arial", size=12, color='white'),
+            plot_bgcolor='rgb(17,17,17)',
+            paper_bgcolor='rgb(17,17,17)',
             margin=dict(l=50, r=50, t=100, b=50)
         )
         
