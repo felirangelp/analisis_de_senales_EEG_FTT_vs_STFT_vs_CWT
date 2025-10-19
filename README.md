@@ -1,152 +1,126 @@
-# Análisis de Señales EEG: FFT, STFT y CWT
+# 🧠 Análisis de Señales EEG: FFT vs STFT vs CWT
 
-Este proyecto implementa un análisis comparativo de señales EEG utilizando tres transformadas diferentes para identificar contenido en frecuencia:
+Este proyecto realiza un análisis comparativo de señales electroencefalográficas (EEG) utilizando tres transformadas diferentes:
 
-1. **FFT** (Fast Fourier Transform) - Espectro de frecuencias
-2. **STFT** (Short-Time Fourier Transform) - Espectrograma  
-3. **CWT** (Continuous Wavelet Transform) - Escalograma
+- **FFT (Fast Fourier Transform)**: Análisis en el dominio de la frecuencia
+- **STFT (Short-Time Fourier Transform)**: Análisis tiempo-frecuencia con ventanas fijas
+- **CWT (Continuous Wavelet Transform)**: Análisis tiempo-frecuencia con ventanas adaptativas
 
-## 🎯 Objetivo
+## 📊 Dashboards Disponibles
 
-Responder la pregunta: **¿Qué contenido en frecuencia identifica cada transformada?**
+### 🎯 [Dashboard Principal](https://tu-usuario.github.io/tu-repositorio/)
+Página principal con pestañas que integra ambos dashboards:
+- **Pestaña Gráficas**: Visualizaciones interactivas de las transformadas
+- **Pestaña Interpretación**: Análisis detallado y comentarios interpretativos
 
-## 📊 Archivos de Datos
+### 📈 [Gráficas Interactivas](https://tu-usuario.github.io/tu-repositorio/dashboard.html)
+Dashboard enfocado únicamente en las visualizaciones:
+- Gráficas de FFT con picos identificados
+- Espectrogramas STFT con mapa de colores viridis
+- Escalogramas CWT con mapa de colores plasma
 
-- `FileEEG.mat`: Señal EEG de 1024 Hz, 180 segundos, 2 canales
-- `sEEG.mat`: Señal EEG de 256 Hz, 78 segundos, 1 canal (T8-P8)
+### 📝 [Interpretación Detallada](https://tu-usuario.github.io/tu-repositorio/dashboard_interpretaciones.html)
+Dashboard con análisis interpretativo completo:
+- Características de cada transformada
+- Comparación de rendimiento computacional
+- Guía de colores y significados
+- Conclusiones y recomendaciones
 
 ## 🚀 Instalación y Uso
 
 ### Requisitos
 - Python 3.10+
-- Archivos de datos EEG (.mat)
+- pip
 
-### Configuración del Ambiente
-
+### Instalación
 ```bash
-# Crear ambiente virtual
-python3 -m venv venv
+# Clonar el repositorio
+git clone https://github.com/tu-usuario/tu-repositorio.git
+cd tu-repositorio
 
-# Activar ambiente virtual
-source venv/bin/activate  # Linux/Mac
-# o
-venv\Scripts\activate      # Windows
+# Crear ambiente virtual
+python -m venv venv
+source venv/bin/activate  # En Windows: venv\Scripts\activate
 
 # Instalar dependencias
 pip install -r requirements.txt
 ```
 
-### Ejecutar Análisis
-
+### Ejecución
 ```bash
+# Ejecutar análisis completo
 python analysis.py
 ```
 
-## 📈 Resultados
+## 📁 Archivos del Proyecto
 
-El script genera:
+- `analysis.py`: Script principal de análisis
+- `requirements.txt`: Dependencias de Python
+- `FileEEG.mat` y `sEEG.mat`: Archivos de datos EEG
+- `index.html`: Dashboard principal con pestañas
+- `dashboard.html`: Dashboard de gráficas
+- `dashboard_interpretaciones.html`: Dashboard de interpretación
+- `analysis_report.md`: Reporte detallado del análisis
 
-- **`dashboard.html`**: Dashboard interactivo con gráficas comparativas
-- **`analysis_report.md`**: Reporte detallado del análisis
+## 🔧 Tecnologías Utilizadas
 
-### Dashboard Interactivo
-
-El dashboard incluye:
-- Espectro FFT con picos identificados
-- Espectrograma STFT (tiempo-frecuencia)
-- Escalograma CWT (tiempo-frecuencia adaptativo)
-- Comparación de tiempos de procesamiento
-
-## 🔬 Metodología
-
-### FFT (Fast Fourier Transform)
-- **Propósito**: Identificar componentes frecuenciales de toda la señal
-- **Ventaja**: Muy rápida, ideal para análisis inicial
-- **Limitación**: Sin resolución temporal
-
-### STFT (Short-Time Fourier Transform)
-- **Propósito**: Análisis tiempo-frecuencia con ventanas fijas
-- **Ventana**: 6 segundos (3 ciclos de frecuencia mínima)
-- **Ventaja**: Balance entre velocidad y resolución temporal
-- **Limitación**: Resolución fija (principio de incertidumbre)
-
-### CWT (Continuous Wavelet Transform)
-- **Propósito**: Análisis tiempo-frecuencia con resolución adaptativa
-- **Wavelet**: Complex Morlet (cmor)
-- **Escalas**: 50 escalas logarítmicas
-- **Ventaja**: Resolución óptima para cada banda de frecuencia
-- **Limitación**: Computacionalmente más costosa
-
-## ⚡ Rendimiento
-
-### Tiempos de Procesamiento (FileEEG.mat)
-- **FFT**: 0.016 segundos
-- **STFT**: 0.002 segundos  
-- **CWT**: 1.138 segundos
-
-### Comparación
-- CWT es **70x más lento** que FFT
-- CWT es **561x más lento** que STFT
-
-## 📋 Conclusiones
-
-### ¿Qué contenido en frecuencia identifica cada transformada?
-
-1. **FFT**: Contenido frecuencial promedio de toda la señal
-   - Identifica bandas dominantes (delta, theta, alpha, beta, gamma)
-   - Sin información temporal
-
-2. **STFT**: Contenido frecuencial con resolución temporal fija
-   - Buena para eventos transitorios
-   - Resolución limitada por principio de incertidumbre
-
-3. **CWT**: Contenido frecuencial con resolución adaptativa
-   - Resolución temporal alta para frecuencias altas
-   - Resolución frecuencial alta para frecuencias bajas
-   - Ideal para análisis simultáneo de múltiples bandas EEG
-
-## 🌐 GitLab Pages
-
-Este proyecto está configurado para desplegarse automáticamente en GitLab Pages:
-
-1. Sube el código a GitLab
-2. El pipeline CI/CD ejecutará el análisis automáticamente
-3. El dashboard estará disponible en: `https://[usuario].gitlab.io/[proyecto]`
-
-## 📁 Estructura del Proyecto
-
-```
-├── analysis.py              # Script principal de análisis
-├── requirements.txt         # Dependencias Python
-├── .gitlab-ci.yml          # Configuración CI/CD
-├── .gitignore              # Archivos a ignorar
-├── README.md               # Este archivo
-├── FileEEG.mat            # Datos EEG (1024 Hz)
-├── sEEG.mat               # Datos EEG (256 Hz)
-├── dashboard.html         # Dashboard generado
-└── analysis_report.md     # Reporte generado
-```
-
-## 🛠️ Tecnologías Utilizadas
-
-- **Python 3.10**
-- **NumPy**: Manipulación de arrays
-- **SciPy**: Transformadas y procesamiento de señales
-- **PyWavelets**: Transformada Wavelet Continua
+- **Python**: Lenguaje principal
+- **SciPy**: Procesamiento de señales y filtros
+- **NumPy**: Operaciones numéricas
+- **PyWavelets**: Transformada wavelet continua
 - **Plotly**: Visualizaciones interactivas
-- **Matplotlib**: Gráficas estáticas
+- **GitHub Actions**: Despliegue automático
+- **GitHub Pages**: Hosting del dashboard
 
-## 👨‍💻 Autor
+## 📈 Características del Análisis
 
-**Felipe Rangel**  
-Procesamiento de Señales Biológicas  
-Maestría en Inteligencia Artificial  
-Universidad Javeriana
+### Preprocesamiento
+- Detrending de señales
+- Filtro pasa-banda (0.5-50 Hz)
+- Normalización de datos
 
-## 📅 Fecha
+### Transformadas Implementadas
+1. **FFT**: Identificación de componentes frecuenciales principales
+2. **STFT**: Análisis tiempo-frecuencia con ventana Hanning
+3. **CWT**: Análisis multiresolución con wavelet Morlet compleja
 
-Octubre 2025
+### Métricas de Rendimiento
+- Tiempo de procesamiento para cada transformada
+- Comparación de eficiencia computacional
+- Análisis de resolución temporal y frecuencial
+
+## 🎨 Diseño del Dashboard
+
+- **Interfaz moderna**: Diseño responsive con gradientes y efectos glassmorphism
+- **Navegación por pestañas**: Acceso fácil a diferentes secciones
+- **Gráficas interactivas**: Zoom, pan y hover con información detallada
+- **Guía de colores**: Interpretación visual de los mapas de colores
+- **Responsive**: Compatible con dispositivos móviles y tablets
+
+## 📊 Resultados Destacados
+
+- **FFT**: Identificación rápida de componentes frecuenciales dominantes
+- **STFT**: Balance entre resolución temporal y frecuencial
+- **CWT**: Mejor resolución para frecuencias variables en el tiempo
+
+## 🤝 Contribuciones
+
+Las contribuciones son bienvenidas. Por favor:
+1. Fork el proyecto
+2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abre un Pull Request
+
+## 📄 Licencia
+
+Este proyecto está bajo la Licencia MIT. Ver el archivo `LICENSE` para más detalles.
+
+## 📞 Contacto
+
+Para preguntas o sugerencias, por favor abre un issue en el repositorio.
 
 ---
 
-*Este proyecto forma parte del curso de Procesamiento de Señales Biológicas y demuestra la implementación práctica de transformadas tiempo-frecuencia para análisis de señales EEG.*
+**Proyecto académico** - Procesamiento de Señales Biológicas  
+Universidad Javeriana - Maestría en Inteligencia Artificial
