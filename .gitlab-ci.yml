@@ -1,0 +1,54 @@
+# GitLab CI/CD Pipeline para Análisis EEG
+# Configuración para GitLab Pages
+
+stages:
+  - analyze
+  - deploy
+
+variables:
+  PYTHON_VERSION: "3.10"
+
+# Análisis de datos
+analyze:
+  stage: analyze
+  image: python:${PYTHON_VERSION}-slim
+  before_script:
+    - python -m pip install --upgrade pip
+    - pip install -r requirements.txt
+  script:
+    - python analysis.py
+  artifacts:
+    paths:
+      - dashboard.html
+      - analysis_report.md
+    expire_in: 1 hour
+  only:
+    - main
+    - master
+
+# Despliegue a GitLab Pages
+pages:
+  stage: deploy
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache rsync
+  script:
+    - echo "Desplegando dashboard a GitLab Pages..."
+    - mkdir public
+    - cp dashboard.html public/index.html
+    - cp analysis_report.md public/
+    - echo "# Análisis EEG Dashboard" > public/README.md
+    - echo "" >> public/README.md
+    - echo "Este proyecto contiene el análisis comparativo de señales EEG usando FFT, STFT y CWT." >> public/README.md
+    - echo "" >> public/README.md
+    - echo "## Archivos disponibles:" >> public/README.md
+    - echo "- [Dashboard Interactivo](index.html)" >> public/README.md
+    - echo "- [Reporte de Análisis](analysis_report.md)" >> public/README.md
+  artifacts:
+    paths:
+      - public
+  only:
+    - main
+    - master
+  dependencies:
+    - analyze
