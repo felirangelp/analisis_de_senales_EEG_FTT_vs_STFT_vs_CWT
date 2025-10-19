@@ -1,0 +1,660 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis Interpretativo: FFT vs STFT vs CWT</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header .subtitle {
+            font-size: 1.2em;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+        
+        .main-question {
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3);
+        }
+        
+        .main-question h2 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+        
+        .main-question p {
+            font-size: 1.1em;
+            font-weight: 300;
+        }
+        
+        .signal-analysis {
+            margin-bottom: 40px;
+        }
+        
+        .signal-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .signal-title {
+            font-size: 1.8em;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .signal-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2em;
+        }
+        
+        .signal-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .info-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .info-item strong {
+            color: #2c3e50;
+        }
+        
+        .transform-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 25px;
+        }
+        
+        .transform-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-top: 5px solid;
+        }
+        
+        .transform-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }
+        
+        .transform-card.fft {
+            border-top-color: #e74c3c;
+        }
+        
+        .transform-card.stft {
+            border-top-color: #27ae60;
+        }
+        
+        .transform-card.cwt {
+            border-top-color: #8e44ad;
+        }
+        
+        .transform-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .transform-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5em;
+            font-weight: bold;
+        }
+        
+        .transform-icon.fft {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+        }
+        
+        .transform-icon.stft {
+            background: linear-gradient(45deg, #27ae60, #229954);
+        }
+        
+        .transform-icon.cwt {
+            background: linear-gradient(45deg, #8e44ad, #7d3c98);
+        }
+        
+        .transform-title {
+            font-size: 1.4em;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        
+        .transform-content {
+            color: #555;
+        }
+        
+        .transform-content ul {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .transform-content li {
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+        
+        .transform-content li:before {
+            content: "▶";
+            position: absolute;
+            left: 0;
+            color: #3498db;
+            font-size: 0.8em;
+        }
+        
+        .transform-content strong {
+            color: #2c3e50;
+        }
+        
+        .performance-section {
+            background: linear-gradient(45deg, #9b59b6, #8e44ad);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 30px 0;
+            box-shadow: 0 8px 25px rgba(155, 89, 182, 0.3);
+        }
+        
+        .performance-title {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .performance-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }
+        
+        .performance-item {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .conclusions-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .conclusions-title {
+            font-size: 1.8em;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+        
+        .conclusion-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }
+        
+        .conclusion-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid;
+        }
+        
+        .conclusion-card:nth-child(1) {
+            border-left-color: #e74c3c;
+        }
+        
+        .conclusion-card:nth-child(2) {
+            border-left-color: #27ae60;
+        }
+        
+        .conclusion-card:nth-child(3) {
+            border-left-color: #8e44ad;
+        }
+        
+        .conclusion-title {
+            font-size: 1.3em;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+        
+        .recommendations {
+            background: linear-gradient(45deg, #1abc9c, #16a085);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 30px;
+            box-shadow: 0 8px 25px rgba(26, 188, 156, 0.3);
+        }
+        
+        .recommendations-title {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+        
+        .recommendations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .recommendation-item {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .color-guide {
+            background: #e74c3c;
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 30px;
+        }
+        
+        .color-guide-title {
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }
+        
+        .color-items {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        .color-item {
+            background: #f0625a;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .transform-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .signal-info {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 Análisis Interpretativo de EEG</h1>
+            <p class="subtitle">FFT vs STFT vs CWT - Comparación de Transformadas</p>
+        </div>
+        
+        <div class="main-question">
+            <h2>🎯 Pregunta Principal</h2>
+            <p>¿Qué contenido en frecuencia identifica cada transformada?</p>
+        </div>
+        
+        
+            <div class="signal-analysis">
+                <div class="signal-card">
+                    <h2 class="signal-title">
+                        <div class="signal-icon">📊</div>
+                        Análisis de FILEEEG
+                    </h2>
+                    
+                    <div class="signal-info">
+                        <div class="info-item">
+                            <strong>Frecuencia de muestreo:</strong><br>
+                            1024 Hz
+                        </div>
+                        <div class="info-item">
+                            <strong>Duración:</strong><br>
+                            180.0 segundos
+                        </div>
+                        <div class="info-item">
+                            <strong>Muestras:</strong><br>
+                            184,321
+                        </div>
+                    </div>
+                    
+                    <div class="transform-grid">
+                        
+            <div class="transform-card fft">
+                <div class="transform-header">
+                    <div class="transform-icon fft">F</div>
+                    <h3 class="transform-title">FFT</h3>
+                </div>
+                <div class="transform-content">
+                    
+                <ul>
+                    <li><strong>Identifica:</strong> Contenido frecuencial promedio de toda la señal</li>
+                    <li><strong>Resolución temporal:</strong> Ninguna (promedio global)</li>
+                    <li><strong>Ventaja:</strong> Muy rápida, ideal para identificar bandas dominantes</li>
+                    <li><strong>Limitación:</strong> No proporciona información temporal</li>
+                    <li><strong>Picos principales:</strong> 0.42, 0.49, 0.56, 0.62, 0.70 Hz</li>
+                    <li><strong>Tiempo de procesamiento:</strong> 0.0190 segundos</li>
+                </ul>
+                
+                </div>
+            </div>
+            
+            <div class="transform-card stft">
+                <div class="transform-header">
+                    <div class="transform-icon stft">S</div>
+                    <h3 class="transform-title">STFT</h3>
+                </div>
+                <div class="transform-content">
+                    
+                <ul>
+                    <li><strong>Identifica:</strong> Contenido frecuencial con resolución temporal fija</li>
+                    <li><strong>Resolución temporal:</strong> Fija (ventana constante)</li>
+                    <li><strong>Ventana utilizada:</strong> 6.0 segundos</li>
+                    <li><strong>Ventaja:</strong> Balance entre velocidad y resolución temporal</li>
+                    <li><strong>Limitación:</strong> Resolución fija (principio de incertidumbre)</li>
+                    <li><strong>Ideal para:</strong> Análisis de eventos transitorios</li>
+                    <li><strong>Tiempo de procesamiento:</strong> 0.0021 segundos</li>
+                </ul>
+                
+                </div>
+            </div>
+            
+            <div class="transform-card cwt">
+                <div class="transform-header">
+                    <div class="transform-icon cwt">C</div>
+                    <h3 class="transform-title">CWT</h3>
+                </div>
+                <div class="transform-content">
+                    
+                <ul>
+                    <li><strong>Identifica:</strong> Contenido frecuencial con resolución temporal adaptativa</li>
+                    <li><strong>Resolución temporal:</strong> Adaptativa (cambia con la frecuencia)</li>
+                    <li><strong>Wavelet utilizada:</strong> cmor</li>
+                    <li><strong>Escalas:</strong> 50 (de 1.0 a 100.0)</li>
+                    <li><strong>Ventaja:</strong> Resolución óptima para cada banda de frecuencia</li>
+                    <li><strong>Limitación:</strong> Computacionalmente más costosa</li>
+                    <li><strong>Ideal para:</strong> Análisis simultáneo de múltiples bandas EEG</li>
+                    <li><strong>Tiempo de procesamiento:</strong> 1.0989 segundos</li>
+                </ul>
+                
+                </div>
+            </div>
+            
+                    </div>
+                </div>
+            </div>
+            
+            <div class="signal-analysis">
+                <div class="signal-card">
+                    <h2 class="signal-title">
+                        <div class="signal-icon">📊</div>
+                        Análisis de SEEG
+                    </h2>
+                    
+                    <div class="signal-info">
+                        <div class="info-item">
+                            <strong>Frecuencia de muestreo:</strong><br>
+                            256 Hz
+                        </div>
+                        <div class="info-item">
+                            <strong>Duración:</strong><br>
+                            78.1 segundos
+                        </div>
+                        <div class="info-item">
+                            <strong>Muestras:</strong><br>
+                            20,001
+                        </div>
+                    </div>
+                    
+                    <div class="transform-grid">
+                        
+            <div class="transform-card fft">
+                <div class="transform-header">
+                    <div class="transform-icon fft">F</div>
+                    <h3 class="transform-title">FFT</h3>
+                </div>
+                <div class="transform-content">
+                    
+                <ul>
+                    <li><strong>Identifica:</strong> Contenido frecuencial promedio de toda la señal</li>
+                    <li><strong>Resolución temporal:</strong> Ninguna (promedio global)</li>
+                    <li><strong>Ventaja:</strong> Muy rápida, ideal para identificar bandas dominantes</li>
+                    <li><strong>Limitación:</strong> No proporciona información temporal</li>
+                    <li><strong>Picos principales:</strong> 0.35, 0.37, 0.40, 0.42, 0.46 Hz</li>
+                    <li><strong>Tiempo de procesamiento:</strong> 0.0008 segundos</li>
+                </ul>
+                
+                </div>
+            </div>
+            
+            <div class="transform-card stft">
+                <div class="transform-header">
+                    <div class="transform-icon stft">S</div>
+                    <h3 class="transform-title">STFT</h3>
+                </div>
+                <div class="transform-content">
+                    
+                <ul>
+                    <li><strong>Identifica:</strong> Contenido frecuencial con resolución temporal fija</li>
+                    <li><strong>Resolución temporal:</strong> Fija (ventana constante)</li>
+                    <li><strong>Ventana utilizada:</strong> 6.0 segundos</li>
+                    <li><strong>Ventaja:</strong> Balance entre velocidad y resolución temporal</li>
+                    <li><strong>Limitación:</strong> Resolución fija (principio de incertidumbre)</li>
+                    <li><strong>Ideal para:</strong> Análisis de eventos transitorios</li>
+                    <li><strong>Tiempo de procesamiento:</strong> 0.0003 segundos</li>
+                </ul>
+                
+                </div>
+            </div>
+            
+            <div class="transform-card cwt">
+                <div class="transform-header">
+                    <div class="transform-icon cwt">C</div>
+                    <h3 class="transform-title">CWT</h3>
+                </div>
+                <div class="transform-content">
+                    
+                <ul>
+                    <li><strong>Identifica:</strong> Contenido frecuencial con resolución temporal adaptativa</li>
+                    <li><strong>Resolución temporal:</strong> Adaptativa (cambia con la frecuencia)</li>
+                    <li><strong>Wavelet utilizada:</strong> cmor</li>
+                    <li><strong>Escalas:</strong> 50 (de 1.0 a 100.0)</li>
+                    <li><strong>Ventaja:</strong> Resolución óptima para cada banda de frecuencia</li>
+                    <li><strong>Limitación:</strong> Computacionalmente más costosa</li>
+                    <li><strong>Ideal para:</strong> Análisis simultáneo de múltiples bandas EEG</li>
+                    <li><strong>Tiempo de procesamiento:</strong> 0.1207 segundos</li>
+                </ul>
+                
+                </div>
+            </div>
+            
+                    </div>
+                </div>
+            </div>
+            
+        
+        <div class="performance-section">
+            <h2 class="performance-title">⚡ Comparación de Rendimiento</h2>
+            <div class="performance-grid">
+                
+            <div class="performance-item">
+                <strong>FileEEG:</strong><br>
+                CWT es 57.9x más lenta que FFT<br>
+                CWT es 533.9x más lenta que STFT
+            </div>
+            
+            <div class="performance-item">
+                <strong>sEEG:</strong><br>
+                CWT es 153.3x más lenta que FFT<br>
+                CWT es 370.0x más lenta que STFT
+            </div>
+            
+            </div>
+        </div>
+        
+        <div class="conclusions-section">
+            <h2 class="conclusions-title">🎓 Conclusiones Generales</h2>
+            <div class="conclusion-grid">
+                
+            <div class="conclusion-card">
+                <h3 class="conclusion-title">FFT - Análisis Global</h3>
+                <p>Identifica el contenido frecuencial promedio de toda la señal. Sin información temporal. Útil para identificar bandas dominantes (delta, theta, alpha, beta, gamma).</p>
+            </div>
+            
+            <div class="conclusion-card">
+                <h3 class="conclusion-title">STFT - Análisis Temporal Fijo</h3>
+                <p>Identifica contenido frecuencial con resolución temporal fija. Ventana fija: buena resolución temporal para frecuencias altas. Ideal para análisis de eventos transitorios.</p>
+            </div>
+            
+            <div class="conclusion-card">
+                <h3 class="conclusion-title">CWT - Análisis Temporal Adaptativo</h3>
+                <p>Identifica contenido frecuencial con resolución temporal adaptativa. Resolución temporal alta para frecuencias altas. Mejor para análisis de diferentes bandas EEG simultáneamente.</p>
+            </div>
+            
+            </div>
+        </div>
+        
+        <div class="recommendations">
+            <h2 class="recommendations-title">📋 Recomendaciones de Uso</h2>
+            <div class="recommendations-grid">
+                
+            <div class="recommendation-item">
+                <strong>FFT:</strong><br>
+                Para análisis inicial y identificación de bandas dominantes
+            </div>
+            
+            <div class="recommendation-item">
+                <strong>STFT:</strong><br>
+                Para análisis de eventos transitorios y tiempo real
+            </div>
+            
+            <div class="recommendation-item">
+                <strong>CWT:</strong><br>
+                Para análisis detallado de múltiples bandas EEG simultáneamente
+            </div>
+            
+            </div>
+        </div>
+        
+        <div class="color-guide">
+            <h2 class="color-guide-title">🔍 Guía de Colores</h2>
+            <div class="color-items">
+                
+            <div class="color-item">
+                <strong>Azul oscuro:</strong><br>
+                Baja energía/magnitud
+            </div>
+            
+            <div class="color-item">
+                <strong>Amarillo:</strong><br>
+                Alta energía/magnitud
+            </div>
+            
+            <div class="color-item">
+                <strong>Puntos rojos:</strong><br>
+                Picos identificados en FFT
+            </div>
+            
+            <div class="color-item">
+                <strong>STFT (Viridis):</strong><br>
+                Verde = baja energía, Amarillo = alta energía
+            </div>
+            
+            <div class="color-item">
+                <strong>CWT (Plasma):</strong><br>
+                Púrpura = baja energía, Amarillo = alta energía
+            </div>
+            
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+        
