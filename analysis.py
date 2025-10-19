@@ -384,60 +384,643 @@ class EEGAnalyzer:
         return fig
     
     def create_interpretation_dashboard(self):
-        """Crear dashboard separado con interpretaciones detalladas"""
-        print("\nGenerando dashboard de interpretaciones...")
+        """Crear dashboard separado con interpretaciones detalladas y diseño moderno"""
+        print("\nGenerando dashboard de interpretaciones con diseño moderno...")
         
-        # Crear figura para interpretaciones
-        fig = go.Figure()
-        
-        # Contenido interpretativo detallado
-        interpretation_content = self.generate_detailed_interpretation()
-        
-        # Agregar contenido como anotación
-        fig.add_annotation(
-            x=0.5,
-            y=0.95,
-            xref="paper",
-            yref="paper",
-            text="<b>📊 INTERPRETACIÓN DETALLADA DE RESULTADOS</b>",
-            showarrow=False,
-            font=dict(color="white", size=24),
-            align="center"
-        )
-        
-        fig.add_annotation(
-            x=0.5,
-            y=0.85,
-            xref="paper",
-            yref="paper",
-            text=interpretation_content,
-            showarrow=False,
-            font=dict(color="white", size=14),
-            align="left"
-        )
-        
-        # Layout del dashboard de interpretaciones
-        fig.update_layout(
-            title={
-                'text': 'Análisis Interpretativo: FFT vs STFT vs CWT<br><sub>¿Qué contenido en frecuencia identifica cada transformada?</sub>',
-                'x': 0.5,
-                'xanchor': 'center',
-                'font': {'size': 20, 'color': 'white'}
-            },
-            height=1000,
-            template='plotly_dark',
-            font=dict(family="Arial", size=12, color='white'),
-            plot_bgcolor='rgb(17,17,17)',
-            paper_bgcolor='rgb(17,17,17)',
-            margin=dict(l=50, r=50, t=100, b=50)
-        )
+        # Crear HTML personalizado con diseño moderno
+        html_content = self.create_modern_interpretation_html()
         
         # Guardar dashboard de interpretaciones
         interpretation_path = 'dashboard_interpretaciones.html'
-        fig.write_html(interpretation_path, include_plotlyjs='cdn')
-        print(f"Dashboard de interpretaciones guardado en: {interpretation_path}")
+        with open(interpretation_path, 'w', encoding='utf-8') as f:
+            f.write(html_content)
+        print(f"Dashboard de interpretaciones moderno guardado en: {interpretation_path}")
         
-        return fig
+        return None
+    
+    def create_modern_interpretation_html(self):
+        """Crear HTML moderno para el dashboard de interpretaciones"""
+        
+        # Generar contenido interpretativo
+        interpretation_data = self.generate_interpretation_data()
+        
+        html_template = f"""
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Análisis Interpretativo: FFT vs STFT vs CWT</title>
+    <style>
+        * {{
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }}
+        
+        body {{
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+            line-height: 1.6;
+        }}
+        
+        .container {{
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }}
+        
+        .header {{
+            text-align: center;
+            margin-bottom: 40px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            backdrop-filter: blur(10px);
+        }}
+        
+        .header h1 {{
+            font-size: 2.5em;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }}
+        
+        .header .subtitle {{
+            font-size: 1.2em;
+            color: #7f8c8d;
+            font-style: italic;
+        }}
+        
+        .main-question {{
+            background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.3);
+        }}
+        
+        .main-question h2 {{
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }}
+        
+        .main-question p {{
+            font-size: 1.1em;
+            font-weight: 300;
+        }}
+        
+        .signal-analysis {{
+            margin-bottom: 40px;
+        }}
+        
+        .signal-card {{
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }}
+        
+        .signal-title {{
+            font-size: 1.8em;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }}
+        
+        .signal-icon {{
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(45deg, #3498db, #2980b9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2em;
+        }}
+        
+        .signal-info {{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }}
+        
+        .info-item {{
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #3498db;
+        }}
+        
+        .info-item strong {{
+            color: #2c3e50;
+        }}
+        
+        .transform-grid {{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-top: 25px;
+        }}
+        
+        .transform-card {{
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-top: 5px solid;
+        }}
+        
+        .transform-card:hover {{
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+        }}
+        
+        .transform-card.fft {{
+            border-top-color: #3498db;
+        }}
+        
+        .transform-card.stft {{
+            border-top-color: #2ecc71;
+        }}
+        
+        .transform-card.cwt {{
+            border-top-color: #f39c12;
+        }}
+        
+        .transform-header {{
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }}
+        
+        .transform-icon {{
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5em;
+            font-weight: bold;
+        }}
+        
+        .transform-icon.fft {{
+            background: linear-gradient(45deg, #3498db, #2980b9);
+        }}
+        
+        .transform-icon.stft {{
+            background: linear-gradient(45deg, #2ecc71, #27ae60);
+        }}
+        
+        .transform-icon.cwt {{
+            background: linear-gradient(45deg, #f39c12, #e67e22);
+        }}
+        
+        .transform-title {{
+            font-size: 1.4em;
+            color: #2c3e50;
+            font-weight: 600;
+        }}
+        
+        .transform-content {{
+            color: #555;
+        }}
+        
+        .transform-content ul {{
+            list-style: none;
+            padding: 0;
+        }}
+        
+        .transform-content li {{
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }}
+        
+        .transform-content li:before {{
+            content: "▶";
+            position: absolute;
+            left: 0;
+            color: #3498db;
+            font-size: 0.8em;
+        }}
+        
+        .transform-content strong {{
+            color: #2c3e50;
+        }}
+        
+        .performance-section {{
+            background: linear-gradient(45deg, #9b59b6, #8e44ad);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 30px 0;
+            box-shadow: 0 8px 25px rgba(155, 89, 182, 0.3);
+        }}
+        
+        .performance-title {{
+            font-size: 1.5em;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }}
+        
+        .performance-grid {{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+        }}
+        
+        .performance-item {{
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }}
+        
+        .conclusions-section {{
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }}
+        
+        .conclusions-title {{
+            font-size: 1.8em;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            text-align: center;
+        }}
+        
+        .conclusion-grid {{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+        }}
+        
+        .conclusion-card {{
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            border-left: 5px solid;
+        }}
+        
+        .conclusion-card:nth-child(1) {{
+            border-left-color: #3498db;
+        }}
+        
+        .conclusion-card:nth-child(2) {{
+            border-left-color: #2ecc71;
+        }}
+        
+        .conclusion-card:nth-child(3) {{
+            border-left-color: #f39c12;
+        }}
+        
+        .conclusion-title {{
+            font-size: 1.3em;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }}
+        
+        .recommendations {{
+            background: linear-gradient(45deg, #1abc9c, #16a085);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 30px;
+            box-shadow: 0 8px 25px rgba(26, 188, 156, 0.3);
+        }}
+        
+        .recommendations-title {{
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }}
+        
+        .recommendations-grid {{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }}
+        
+        .recommendation-item {{
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }}
+        
+        .color-guide {{
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 30px;
+            box-shadow: 0 8px 25px rgba(231, 76, 60, 0.3);
+        }}
+        
+        .color-guide-title {{
+            font-size: 1.5em;
+            margin-bottom: 15px;
+        }}
+        
+        .color-items {{
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }}
+        
+        .color-item {{
+            background: rgba(255, 255, 255, 0.2);
+            padding: 15px;
+            border-radius: 10px;
+            backdrop-filter: blur(10px);
+        }}
+        
+        @media (max-width: 768px) {{
+            .container {{
+                padding: 10px;
+            }}
+            
+            .header h1 {{
+                font-size: 2em;
+            }}
+            
+            .transform-grid {{
+                grid-template-columns: 1fr;
+            }}
+            
+            .signal-info {{
+                grid-template-columns: 1fr;
+            }}
+        }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 Análisis Interpretativo de EEG</h1>
+            <p class="subtitle">FFT vs STFT vs CWT - Comparación de Transformadas</p>
+        </div>
+        
+        <div class="main-question">
+            <h2>🎯 Pregunta Principal</h2>
+            <p>¿Qué contenido en frecuencia identifica cada transformada?</p>
+        </div>
+        
+        {interpretation_data['signals_html']}
+        
+        <div class="performance-section">
+            <h2 class="performance-title">⚡ Comparación de Rendimiento</h2>
+            <div class="performance-grid">
+                {interpretation_data['performance_html']}
+            </div>
+        </div>
+        
+        <div class="conclusions-section">
+            <h2 class="conclusions-title">🎓 Conclusiones Generales</h2>
+            <div class="conclusion-grid">
+                {interpretation_data['conclusions_html']}
+            </div>
+        </div>
+        
+        <div class="recommendations">
+            <h2 class="recommendations-title">📋 Recomendaciones de Uso</h2>
+            <div class="recommendations-grid">
+                {interpretation_data['recommendations_html']}
+            </div>
+        </div>
+        
+        <div class="color-guide">
+            <h2 class="color-guide-title">🔍 Guía de Colores</h2>
+            <div class="color-items">
+                {interpretation_data['color_guide_html']}
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+        """
+        
+        return html_template
+    
+    def generate_interpretation_data(self):
+        """Generar datos estructurados para el HTML moderno"""
+        data = {
+            'signals_html': '',
+            'performance_html': '',
+            'conclusions_html': '',
+            'recommendations_html': '',
+            'color_guide_html': ''
+        }
+        
+        # Generar HTML para cada señal
+        for signal_name, results in self.results.items():
+            signal_html = f"""
+            <div class="signal-analysis">
+                <div class="signal-card">
+                    <h2 class="signal-title">
+                        <div class="signal-icon">📊</div>
+                        Análisis de {signal_name.upper()}
+                    </h2>
+                    
+                    <div class="signal-info">
+                        <div class="info-item">
+                            <strong>Frecuencia de muestreo:</strong><br>
+                            {results['fs']} Hz
+                        </div>
+                        <div class="info-item">
+                            <strong>Duración:</strong><br>
+                            {results['duration']:.1f} segundos
+                        </div>
+                        <div class="info-item">
+                            <strong>Muestras:</strong><br>
+                            {results['samples']:,}
+                        </div>
+                    </div>
+                    
+                    <div class="transform-grid">
+                        {self.generate_transform_cards(signal_name, results)}
+                    </div>
+                </div>
+            </div>
+            """
+            data['signals_html'] += signal_html
+        
+        # Generar HTML de rendimiento
+        for signal_name, results in self.results.items():
+            fft_time = results['fft']['processing_time']
+            stft_time = results['stft']['processing_time']
+            cwt_time = results['cwt']['processing_time']
+            
+            data['performance_html'] += f"""
+            <div class="performance-item">
+                <strong>{signal_name}:</strong><br>
+                CWT es {cwt_time/fft_time:.1f}x más lenta que FFT<br>
+                CWT es {cwt_time/stft_time:.1f}x más lenta que STFT
+            </div>
+            """
+        
+        # Generar HTML de conclusiones
+        conclusions = [
+            {
+                'title': 'FFT - Análisis Global',
+                'content': 'Identifica el contenido frecuencial promedio de toda la señal. Sin información temporal. Útil para identificar bandas dominantes (delta, theta, alpha, beta, gamma).'
+            },
+            {
+                'title': 'STFT - Análisis Temporal Fijo',
+                'content': 'Identifica contenido frecuencial con resolución temporal fija. Ventana fija: buena resolución temporal para frecuencias altas. Ideal para análisis de eventos transitorios.'
+            },
+            {
+                'title': 'CWT - Análisis Temporal Adaptativo',
+                'content': 'Identifica contenido frecuencial con resolución temporal adaptativa. Resolución temporal alta para frecuencias altas. Mejor para análisis de diferentes bandas EEG simultáneamente.'
+            }
+        ]
+        
+        for conclusion in conclusions:
+            data['conclusions_html'] += f"""
+            <div class="conclusion-card">
+                <h3 class="conclusion-title">{conclusion['title']}</h3>
+                <p>{conclusion['content']}</p>
+            </div>
+            """
+        
+        # Generar HTML de recomendaciones
+        recommendations = [
+            {'transform': 'FFT', 'use': 'Para análisis inicial y identificación de bandas dominantes'},
+            {'transform': 'STFT', 'use': 'Para análisis de eventos transitorios y tiempo real'},
+            {'transform': 'CWT', 'use': 'Para análisis detallado de múltiples bandas EEG simultáneamente'}
+        ]
+        
+        for rec in recommendations:
+            data['recommendations_html'] += f"""
+            <div class="recommendation-item">
+                <strong>{rec['transform']}:</strong><br>
+                {rec['use']}
+            </div>
+            """
+        
+        # Generar HTML de guía de colores
+        color_guide = [
+            {'color': 'Azul oscuro', 'meaning': 'Baja energía/magnitud'},
+            {'color': 'Amarillo', 'meaning': 'Alta energía/magnitud'},
+            {'color': 'Puntos rojos', 'meaning': 'Picos identificados en FFT'},
+            {'color': 'STFT (Viridis)', 'meaning': 'Verde = baja energía, Amarillo = alta energía'},
+            {'color': 'CWT (Plasma)', 'meaning': 'Púrpura = baja energía, Amarillo = alta energía'}
+        ]
+        
+        for color in color_guide:
+            data['color_guide_html'] += f"""
+            <div class="color-item">
+                <strong>{color['color']}:</strong><br>
+                {color['meaning']}
+            </div>
+            """
+        
+        return data
+    
+    def generate_transform_cards(self, signal_name, results):
+        """Generar tarjetas de transformadas para una señal"""
+        cards_html = ""
+        
+        transforms = [
+            {
+                'name': 'FFT',
+                'class': 'fft',
+                'icon': 'F',
+                'data': results['fft'],
+                'description': 'Fast Fourier Transform'
+            },
+            {
+                'name': 'STFT',
+                'class': 'stft',
+                'icon': 'S',
+                'data': results['stft'],
+                'description': 'Short-Time Fourier Transform'
+            },
+            {
+                'name': 'CWT',
+                'class': 'cwt',
+                'icon': 'C',
+                'data': results['cwt'],
+                'description': 'Continuous Wavelet Transform'
+            }
+        ]
+        
+        for transform in transforms:
+            data = transform['data']
+            
+            # Contenido específico para cada transformada
+            if transform['name'] == 'FFT':
+                content = f"""
+                <ul>
+                    <li><strong>Identifica:</strong> Contenido frecuencial promedio de toda la señal</li>
+                    <li><strong>Resolución temporal:</strong> Ninguna (promedio global)</li>
+                    <li><strong>Ventaja:</strong> Muy rápida, ideal para identificar bandas dominantes</li>
+                    <li><strong>Limitación:</strong> No proporciona información temporal</li>
+                    <li><strong>Picos principales:</strong> {', '.join([f"{freq:.2f}" for freq in data['peak_freqs'][:5]])} Hz</li>
+                    <li><strong>Tiempo de procesamiento:</strong> {data['processing_time']:.4f} segundos</li>
+                </ul>
+                """
+            elif transform['name'] == 'STFT':
+                content = f"""
+                <ul>
+                    <li><strong>Identifica:</strong> Contenido frecuencial con resolución temporal fija</li>
+                    <li><strong>Resolución temporal:</strong> Fija (ventana constante)</li>
+                    <li><strong>Ventana utilizada:</strong> {data['window_length']/results['fs']:.1f} segundos</li>
+                    <li><strong>Ventaja:</strong> Balance entre velocidad y resolución temporal</li>
+                    <li><strong>Limitación:</strong> Resolución fija (principio de incertidumbre)</li>
+                    <li><strong>Ideal para:</strong> Análisis de eventos transitorios</li>
+                    <li><strong>Tiempo de procesamiento:</strong> {data['processing_time']:.4f} segundos</li>
+                </ul>
+                """
+            else:  # CWT
+                content = f"""
+                <ul>
+                    <li><strong>Identifica:</strong> Contenido frecuencial con resolución temporal adaptativa</li>
+                    <li><strong>Resolución temporal:</strong> Adaptativa (cambia con la frecuencia)</li>
+                    <li><strong>Wavelet utilizada:</strong> {data['wavelet']}</li>
+                    <li><strong>Escalas:</strong> {len(data['scales'])} (de {data['scales'][0]:.1f} a {data['scales'][-1]:.1f})</li>
+                    <li><strong>Ventaja:</strong> Resolución óptima para cada banda de frecuencia</li>
+                    <li><strong>Limitación:</strong> Computacionalmente más costosa</li>
+                    <li><strong>Ideal para:</strong> Análisis simultáneo de múltiples bandas EEG</li>
+                    <li><strong>Tiempo de procesamiento:</strong> {data['processing_time']:.4f} segundos</li>
+                </ul>
+                """
+            
+            cards_html += f"""
+            <div class="transform-card {transform['class']}">
+                <div class="transform-header">
+                    <div class="transform-icon {transform['class']}">{transform['icon']}</div>
+                    <h3 class="transform-title">{transform['name']}</h3>
+                </div>
+                <div class="transform-content">
+                    {content}
+                </div>
+            </div>
+            """
+        
+        return cards_html
     
     def generate_detailed_interpretation(self):
         """Generar contenido interpretativo detallado"""
