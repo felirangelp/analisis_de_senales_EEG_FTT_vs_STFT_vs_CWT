@@ -7,7 +7,7 @@
 - **Muestras**: 184,321
 
 ### FFT (Fast Fourier Transform)
-- **Tiempo de procesamiento**: 0.0168 segundos
+- **Tiempo de procesamiento**: 0.0181 segundos
 - **Contenido en frecuencia identificado**:
   - Identifica todas las componentes frecuenciales presentes en toda la señal
   - Sin resolución temporal (promedio de toda la señal)
@@ -24,7 +24,7 @@
   - Ideal para análisis de eventos transitorios
 
 ### CWT (Continuous Wavelet Transform)
-- **Tiempo de procesamiento**: 1.1078 segundos
+- **Tiempo de procesamiento**: 1.0997 segundos
 - **Wavelet utilizada**: cmor
 - **Escalas**: 50 (de 1.00 a 100.00)
 - **Contenido en frecuencia identificado**:
@@ -34,8 +34,8 @@
   - Mejor para análisis de diferentes bandas EEG simultáneamente
 
 ### Comparación de Rendimiento
-- **CWT es 65.8x más lento que FFT**
-- **CWT es 473.2x más lento que STFT**
+- **CWT es 60.9x más lento que FFT**
+- **CWT es 481.5x más lento que STFT**
 
 ---
 
@@ -62,7 +62,7 @@
   - Ideal para análisis de eventos transitorios
 
 ### CWT (Continuous Wavelet Transform)
-- **Tiempo de procesamiento**: 0.1203 segundos
+- **Tiempo de procesamiento**: 0.1204 segundos
 - **Wavelet utilizada**: cmor
 - **Escalas**: 50 (de 1.00 a 100.00)
 - **Contenido en frecuencia identificado**:
@@ -72,8 +72,8 @@
   - Mejor para análisis de diferentes bandas EEG simultáneamente
 
 ### Comparación de Rendimiento
-- **CWT es 196.2x más lento que FFT**
-- **CWT es 315.5x más lento que STFT**
+- **CWT es 208.7x más lento que FFT**
+- **CWT es 334.7x más lento que STFT**
 
 ---
 

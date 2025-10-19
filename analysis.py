@@ -373,12 +373,167 @@ class EEGAnalyzer:
         
         # Sin anotaciones - solo gráficas limpias
         
-        # Guardar dashboard
+        # Guardar dashboard principal
         dashboard_path = 'dashboard.html'
         fig.write_html(dashboard_path, include_plotlyjs='cdn')
-        print(f"Dashboard guardado en: {dashboard_path}")
+        print(f"Dashboard principal guardado en: {dashboard_path}")
+        
+        # Crear dashboard de interpretaciones
+        self.create_interpretation_dashboard()
         
         return fig
+    
+    def create_interpretation_dashboard(self):
+        """Crear dashboard separado con interpretaciones detalladas"""
+        print("\nGenerando dashboard de interpretaciones...")
+        
+        # Crear figura para interpretaciones
+        fig = go.Figure()
+        
+        # Contenido interpretativo detallado
+        interpretation_content = self.generate_detailed_interpretation()
+        
+        # Agregar contenido como anotación
+        fig.add_annotation(
+            x=0.5,
+            y=0.95,
+            xref="paper",
+            yref="paper",
+            text="<b>📊 INTERPRETACIÓN DETALLADA DE RESULTADOS</b>",
+            showarrow=False,
+            font=dict(color="white", size=24),
+            align="center"
+        )
+        
+        fig.add_annotation(
+            x=0.5,
+            y=0.85,
+            xref="paper",
+            yref="paper",
+            text=interpretation_content,
+            showarrow=False,
+            font=dict(color="white", size=14),
+            align="left"
+        )
+        
+        # Layout del dashboard de interpretaciones
+        fig.update_layout(
+            title={
+                'text': 'Análisis Interpretativo: FFT vs STFT vs CWT<br><sub>¿Qué contenido en frecuencia identifica cada transformada?</sub>',
+                'x': 0.5,
+                'xanchor': 'center',
+                'font': {'size': 20}
+            },
+            height=1000,
+            template='plotly_dark',
+            font=dict(family="Arial", size=12),
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)',
+            margin=dict(l=50, r=50, t=100, b=50)
+        )
+        
+        # Guardar dashboard de interpretaciones
+        interpretation_path = 'dashboard_interpretaciones.html'
+        fig.write_html(interpretation_path, include_plotlyjs='cdn')
+        print(f"Dashboard de interpretaciones guardado en: {interpretation_path}")
+        
+        return fig
+    
+    def generate_detailed_interpretation(self):
+        """Generar contenido interpretativo detallado"""
+        content = []
+        
+        # Resumen general
+        content.append("<b>🎯 PREGUNTA PRINCIPAL:</b><br>")
+        content.append("<i>¿Qué contenido en frecuencia identifica cada transformada?</i><br><br>")
+        
+        # Para cada señal
+        for signal_name, results in self.results.items():
+            content.append(f"<b>📈 ANÁLISIS DE {signal_name.upper()}</b><br>")
+            content.append(f"• Frecuencia de muestreo: {results['fs']} Hz<br>")
+            content.append(f"• Duración: {results['duration']:.1f} segundos<br>")
+            content.append(f"• Muestras: {results['samples']:,}<br><br>")
+            
+            # FFT
+            fft_data = results['fft']
+            content.append("<b>🔵 FFT (Fast Fourier Transform):</b><br>")
+            content.append("• <b>Identifica:</b> Contenido frecuencial promedio de toda la señal<br>")
+            content.append("• <b>Resolución temporal:</b> Ninguna (promedio global)<br>")
+            content.append("• <b>Ventaja:</b> Muy rápida, ideal para identificar bandas dominantes<br>")
+            content.append("• <b>Limitación:</b> No proporciona información temporal<br>")
+            if len(fft_data['peaks']) > 0:
+                peak_freqs = ', '.join([f"{freq:.2f}" for freq in fft_data['peak_freqs'][:5]])
+                content.append(f"• <b>Picos principales:</b> {peak_freqs} Hz<br>")
+            content.append(f"• <b>Tiempo de procesamiento:</b> {fft_data['processing_time']:.4f} segundos<br><br>")
+            
+            # STFT
+            stft_data = results['stft']
+            content.append("<b>🟢 STFT (Short-Time Fourier Transform):</b><br>")
+            content.append("• <b>Identifica:</b> Contenido frecuencial con resolución temporal fija<br>")
+            content.append("• <b>Resolución temporal:</b> Fija (ventana constante)<br>")
+            content.append("• <b>Ventana utilizada:</b> {:.1f} segundos<br>".format(stft_data['window_length']/results['fs']))
+            content.append("• <b>Ventaja:</b> Balance entre velocidad y resolución temporal<br>")
+            content.append("• <b>Limitación:</b> Resolución fija (principio de incertidumbre)<br>")
+            content.append("• <b>Ideal para:</b> Análisis de eventos transitorios<br>")
+            content.append(f"• <b>Tiempo de procesamiento:</b> {stft_data['processing_time']:.4f} segundos<br><br>")
+            
+            # CWT
+            cwt_data = results['cwt']
+            content.append("<b>🟡 CWT (Continuous Wavelet Transform):</b><br>")
+            content.append("• <b>Identifica:</b> Contenido frecuencial con resolución temporal adaptativa<br>")
+            content.append("• <b>Resolución temporal:</b> Adaptativa (cambia con la frecuencia)<br>")
+            content.append(f"• <b>Wavelet utilizada:</b> {cwt_data['wavelet']}<br>")
+            content.append(f"• <b>Escalas:</b> {len(cwt_data['scales'])} (de {cwt_data['scales'][0]:.1f} a {cwt_data['scales'][-1]:.1f})<br>")
+            content.append("• <b>Ventaja:</b> Resolución óptima para cada banda de frecuencia<br>")
+            content.append("• <b>Limitación:</b> Computacionalmente más costosa<br>")
+            content.append("• <b>Ideal para:</b> Análisis simultáneo de múltiples bandas EEG<br>")
+            content.append(f"• <b>Tiempo de procesamiento:</b> {cwt_data['processing_time']:.4f} segundos<br><br>")
+            
+            # Comparación de rendimiento
+            fft_time = fft_data['processing_time']
+            stft_time = stft_data['processing_time']
+            cwt_time = cwt_data['processing_time']
+            
+            content.append("<b>⚡ COMPARACIÓN DE RENDIMIENTO:</b><br>")
+            content.append(f"• CWT es {cwt_time/fft_time:.1f}x más lento que FFT<br>")
+            content.append(f"• CWT es {cwt_time/stft_time:.1f}x más lento que STFT<br>")
+            content.append(f"• STFT es {stft_time/fft_time:.1f}x más lento que FFT<br><br>")
+            
+            content.append("─" * 50 + "<br><br>")
+        
+        # Conclusiones generales
+        content.append("<b>🎓 CONCLUSIONES GENERALES</b><br><br>")
+        
+        content.append("<b>1. FFT - Análisis Global:</b><br>")
+        content.append("• Identifica el contenido frecuencial promedio de toda la señal<br>")
+        content.append("• Sin información temporal<br>")
+        content.append("• Útil para identificar bandas dominantes (delta, theta, alpha, beta, gamma)<br><br>")
+        
+        content.append("<b>2. STFT - Análisis Temporal Fijo:</b><br>")
+        content.append("• Identifica contenido frecuencial con resolución temporal fija<br>")
+        content.append("• Ventana fija: buena resolución temporal para frecuencias altas<br>")
+        content.append("• Limitada resolución frecuencial para frecuencias bajas<br>")
+        content.append("• Ideal para análisis de eventos transitorios<br><br>")
+        
+        content.append("<b>3. CWT - Análisis Temporal Adaptativo:</b><br>")
+        content.append("• Identifica contenido frecuencial con resolución temporal adaptativa<br>")
+        content.append("• Resolución temporal alta para frecuencias altas<br>")
+        content.append("• Resolución frecuencial alta para frecuencias bajas<br>")
+        content.append("• Mejor para análisis de diferentes bandas EEG simultáneamente<br><br>")
+        
+        content.append("<b>📋 RECOMENDACIONES DE USO:</b><br>")
+        content.append("• <b>FFT:</b> Para análisis inicial y identificación de bandas dominantes<br>")
+        content.append("• <b>STFT:</b> Para análisis de eventos transitorios y tiempo real<br>")
+        content.append("• <b>CWT:</b> Para análisis detallado de múltiples bandas EEG simultáneamente<br><br>")
+        
+        content.append("<b>🔍 INTERPRETACIÓN DE COLORES:</b><br>")
+        content.append("• <b>Azul oscuro:</b> Baja energía/magnitud<br>")
+        content.append("• <b>Amarillo:</b> Alta energía/magnitud<br>")
+        content.append("• <b>Puntos rojos:</b> Picos identificados en FFT<br>")
+        content.append("• <b>STFT (Viridis):</b> Verde = baja energía, Amarillo = alta energía<br>")
+        content.append("• <b>CWT (Plasma):</b> Púrpura = baja energía, Amarillo = alta energía<br>")
+        
+        return ''.join(content)
     
     def add_interpretation_annotations(self, fig):
         """Agregar anotaciones interpretativas al dashboard"""
