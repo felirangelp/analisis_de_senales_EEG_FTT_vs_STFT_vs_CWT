@@ -549,15 +549,15 @@ class EEGAnalyzer:
         }}
         
         .transform-card.fft {{
-            border-top-color: #3498db;
+            border-top-color: #e74c3c;
         }}
         
         .transform-card.stft {{
-            border-top-color: #2ecc71;
+            border-top-color: #27ae60;
         }}
         
         .transform-card.cwt {{
-            border-top-color: #f39c12;
+            border-top-color: #8e44ad;
         }}
         
         .transform-header {{
@@ -580,15 +580,15 @@ class EEGAnalyzer:
         }}
         
         .transform-icon.fft {{
-            background: linear-gradient(45deg, #3498db, #2980b9);
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
         }}
         
         .transform-icon.stft {{
-            background: linear-gradient(45deg, #2ecc71, #27ae60);
+            background: linear-gradient(45deg, #27ae60, #229954);
         }}
         
         .transform-icon.cwt {{
-            background: linear-gradient(45deg, #f39c12, #e67e22);
+            background: linear-gradient(45deg, #8e44ad, #7d3c98);
         }}
         
         .transform-title {{
@@ -685,15 +685,15 @@ class EEGAnalyzer:
         }}
         
         .conclusion-card:nth-child(1) {{
-            border-left-color: #3498db;
+            border-left-color: #e74c3c;
         }}
         
         .conclusion-card:nth-child(2) {{
-            border-left-color: #2ecc71;
+            border-left-color: #27ae60;
         }}
         
         .conclusion-card:nth-child(3) {{
-            border-left-color: #f39c12;
+            border-left-color: #8e44ad;
         }}
         
         .conclusion-title {{
