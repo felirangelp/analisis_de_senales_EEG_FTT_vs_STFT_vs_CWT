@@ -755,6 +755,27 @@ class EEGAnalyzer:
             padding: 15px;
             border-radius: 10px;
             backdrop-filter: blur(10px);
+            border-left: 5px solid;
+        }}
+        
+        .color-item:nth-child(1) {{
+            border-left-color: #2c3e50;
+        }}
+        
+        .color-item:nth-child(2) {{
+            border-left-color: #f1c40f;
+        }}
+        
+        .color-item:nth-child(3) {{
+            border-left-color: #e74c3c;
+        }}
+        
+        .color-item:nth-child(4) {{
+            border-left-color: #27ae60;
+        }}
+        
+        .color-item:nth-child(5) {{
+            border-left-color: #8e44ad;
         }}
         
         @media (max-width: 768px) {{
