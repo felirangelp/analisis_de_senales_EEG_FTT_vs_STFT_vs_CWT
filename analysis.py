@@ -371,8 +371,7 @@ class EEGAnalyzer:
             fig.update_xaxes(title_text="Tiempo (s)", row=i+1, col=3)
             fig.update_yaxes(title_text="Frecuencia (Hz)", row=i+1, col=3)
         
-        # Agregar anotaciones explicativas
-        self.add_interpretation_annotations(fig)
+        # Sin anotaciones - solo gráficas limpias
         
         # Guardar dashboard
         dashboard_path = 'dashboard.html'
