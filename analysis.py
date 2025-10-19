@@ -267,11 +267,11 @@ class EEGAnalyzer:
         return results
     
     def create_dashboard(self):
-        """Crear dashboard interactivo con Plotly"""
-        print("\nGenerando dashboard interactivo...")
+        """Crear dashboard interactivo con Plotly con pestañas"""
+        print("\nGenerando dashboard interactivo con pestañas...")
         
-        # Crear figura con subplots
-        fig = make_subplots(
+        # Crear figura con subplots para las gráficas
+        fig_graphs = make_subplots(
             rows=len(self.results), cols=3,
             subplot_titles=[f"{signal_name} - {transform}" 
                           for signal_name in self.results.keys() 
@@ -287,7 +287,7 @@ class EEGAnalyzer:
             
             # FFT - Espectro de frecuencias
             fft_data = results['fft']
-            fig.add_trace(
+            fig_graphs.add_trace(
                 go.Scatter(
                     x=fft_data['frequencies'],
                     y=fft_data['magnitude'],
@@ -301,7 +301,7 @@ class EEGAnalyzer:
             
             # Marcar picos principales
             if len(fft_data['peaks']) > 0:
-                fig.add_trace(
+                fig_graphs.add_trace(
                     go.Scatter(
                         x=fft_data['peak_freqs'][:5],
                         y=fft_data['peak_magnitudes'][:5],
@@ -315,7 +315,7 @@ class EEGAnalyzer:
             
             # STFT - Espectrograma
             stft_data = results['stft']
-            fig.add_trace(
+            fig_graphs.add_trace(
                 go.Heatmap(
                     z=stft_data['magnitude'],
                     x=stft_data['times'],
@@ -329,7 +329,7 @@ class EEGAnalyzer:
             
             # CWT - Escalograma
             cwt_data = results['cwt']
-            fig.add_trace(
+            fig_graphs.add_trace(
                 go.Heatmap(
                     z=cwt_data['magnitude'],
                     x=np.arange(len(cwt_data['magnitude'][0])) / fs,
@@ -343,124 +343,368 @@ class EEGAnalyzer:
             
             row += 1
         
-        # Actualizar layout
-        fig.update_layout(
+        # Actualizar layout de las gráficas
+        fig_graphs.update_layout(
             title={
-                'text': 'Análisis Comparativo de Señales EEG: FFT vs STFT vs CWT<br><sub>Interpretación: FFT muestra contenido frecuencial promedio, STFT resolución temporal fija, CWT resolución adaptativa</sub>',
+                'text': 'Análisis Comparativo de Señales EEG: FFT vs STFT vs CWT',
                 'x': 0.5,
                 'xanchor': 'center',
                 'font': {'size': 20}
             },
-            height=500 * len(self.results),
+            height=400 * len(self.results),
             showlegend=False,
             template='plotly_dark',
             font=dict(family="Arial", size=12)
         )
         
-        # Actualizar ejes y agregar anotaciones explicativas
+        # Actualizar ejes de las gráficas
         for i in range(len(self.results)):
-            signal_name = list(self.results.keys())[i]
-            results = self.results[signal_name]
+            # FFT
+            fig_graphs.update_xaxes(title_text="Frecuencia (Hz)", row=i+1, col=1)
+            fig_graphs.update_yaxes(title_text="Magnitud", row=i+1, col=1)
             
-            # FFT - Agregar anotaciones
-            fig.update_xaxes(title_text="Frecuencia (Hz)", row=i+1, col=1)
-            fig.update_yaxes(title_text="Magnitud", row=i+1, col=1)
+            # STFT
+            fig_graphs.update_xaxes(title_text="Tiempo (s)", row=i+1, col=2)
+            fig_graphs.update_yaxes(title_text="Frecuencia (Hz)", row=i+1, col=2)
             
-            # Anotación para FFT
-            fft_data = results['fft']
-            max_mag = np.max(fft_data['magnitude'])
-            max_freq = fft_data['frequencies'][np.argmax(fft_data['magnitude'])]
-            
-            fig.add_annotation(
-                x=max_freq,
-                y=max_mag * 0.8,
-                text=f"<b>FFT:</b><br>• Identifica componentes<br>frecuenciales dominantes<br>• Sin resolución temporal<br>• Picos en: {', '.join([f'{freq:.1f}' for freq in fft_data['peak_freqs'][:3]])} Hz",
-                showarrow=True,
-                arrowhead=2,
-                arrowcolor="white",
-                bgcolor="rgba(0,0,0,0.7)",
-                bordercolor="white",
-                font=dict(color="white", size=10),
-                row=i+1, col=1
-            )
-            
-            # STFT - Agregar anotaciones
-            fig.update_xaxes(title_text="Tiempo (s)", row=i+1, col=2)
-            fig.update_yaxes(title_text="Frecuencia (Hz)", row=i+1, col=2)
-            
-            stft_data = results['stft']
-            fig.add_annotation(
-                x=stft_data['times'][len(stft_data['times'])//2],
-                y=stft_data['frequencies'][-1] * 0.8,
-                text=f"<b>STFT:</b><br>• Resolución temporal fija<br>• Ventana: {stft_data['window_length']/results['fs']:.1f}s<br>• Ideal para eventos<br>transitorios",
-                showarrow=True,
-                arrowhead=2,
-                arrowcolor="white",
-                bgcolor="rgba(0,0,0,0.7)",
-                bordercolor="white",
-                font=dict(color="white", size=10),
-                row=i+1, col=2
-            )
-            
-            # CWT - Agregar anotaciones
-            fig.update_xaxes(title_text="Tiempo (s)", row=i+1, col=3)
-            fig.update_yaxes(title_text="Frecuencia (Hz)", row=i+1, col=3)
-            
-            cwt_data = results['cwt']
-            fig.add_annotation(
-                x=len(cwt_data['magnitude'][0]) / fs / 2,
-                y=cwt_data['frequencies'][-1] * 0.8,
-                text=f"<b>CWT:</b><br>• Resolución adaptativa<br>• Wavelet: {cwt_data['wavelet']}<br>• Mejor para múltiples<br>bandas EEG simultáneas",
-                showarrow=True,
-                arrowhead=2,
-                arrowcolor="white",
-                bgcolor="rgba(0,0,0,0.7)",
-                bordercolor="white",
-                font=dict(color="white", size=10),
-                row=i+1, col=3
-            )
+            # CWT
+            fig_graphs.update_xaxes(title_text="Tiempo (s)", row=i+1, col=3)
+            fig_graphs.update_yaxes(title_text="Frecuencia (Hz)", row=i+1, col=3)
         
-        # Agregar leyenda de colores
-        fig.add_annotation(
-            x=0.02,
-            y=0.98,
+        # Crear figura para comentarios interpretativos
+        fig_comments = go.Figure()
+        
+        # Agregar contenido interpretativo
+        interpretation_text = self.generate_interpretation_content()
+        
+        fig_comments.add_annotation(
+            x=0.5,
+            y=0.95,
             xref="paper",
             yref="paper",
-            text="<b>Leyenda de Colores:</b><br>🔵 Azul oscuro: Baja energía<br>🟡 Amarillo: Alta energía<br>🔴 Puntos rojos: Picos FFT",
+            text="<b>📊 INTERPRETACIÓN DE RESULTADOS</b>",
             showarrow=False,
-            bgcolor="rgba(0,0,0,0.8)",
-            bordercolor="white",
-            font=dict(color="white", size=11),
+            font=dict(color="white", size=24),
+            align="center"
+        )
+        
+        fig_comments.add_annotation(
+            x=0.5,
+            y=0.85,
+            xref="paper",
+            yref="paper",
+            text=interpretation_text,
+            showarrow=False,
+            font=dict(color="white", size=14),
             align="left"
         )
         
-        # Agregar información de rendimiento
-        performance_text = "<b>Rendimiento:</b><br>"
-        for signal_name, results in self.results.items():
-            fft_time = results['fft']['processing_time']
-            stft_time = results['stft']['processing_time']
-            cwt_time = results['cwt']['processing_time']
-            performance_text += f"• {signal_name}: CWT {cwt_time/fft_time:.0f}x más lento que FFT<br>"
-        
-        fig.add_annotation(
-            x=0.98,
-            y=0.98,
-            xref="paper",
-            yref="paper",
-            text=performance_text,
-            showarrow=False,
-            bgcolor="rgba(0,0,0,0.8)",
-            bordercolor="white",
-            font=dict(color="white", size=11),
-            align="right"
+        fig_comments.update_layout(
+            title="",
+            height=800,
+            template='plotly_dark',
+            font=dict(family="Arial", size=12),
+            plot_bgcolor='rgba(0,0,0,0)',
+            paper_bgcolor='rgba(0,0,0,0)'
         )
+        
+        # Crear dashboard con pestañas
+        # Crear figura principal con pestañas
+        fig = go.Figure()
+        
+        # Crear HTML con pestañas usando JavaScript
+        html_content = self.create_tabbed_dashboard_html(fig_graphs, fig_comments)
         
         # Guardar dashboard
         dashboard_path = 'dashboard.html'
-        fig.write_html(dashboard_path)
-        print(f"Dashboard guardado en: {dashboard_path}")
+        with open(dashboard_path, 'w', encoding='utf-8') as f:
+            f.write(html_content)
         
-        return fig
+        print(f"Dashboard con pestañas guardado en: {dashboard_path}")
+        
+        return fig_graphs
+    
+    def generate_interpretation_content(self):
+        """Generar contenido interpretativo detallado"""
+        content = []
+        
+        # Resumen general
+        content.append("<b>🎯 PREGUNTA PRINCIPAL:</b><br>")
+        content.append("<i>¿Qué contenido en frecuencia identifica cada transformada?</i><br><br>")
+        
+        # Para cada señal
+        for signal_name, results in self.results.items():
+            content.append(f"<b>📈 ANÁLISIS DE {signal_name.upper()}</b><br>")
+            content.append(f"• Frecuencia de muestreo: {results['fs']} Hz<br>")
+            content.append(f"• Duración: {results['duration']:.1f} segundos<br>")
+            content.append(f"• Muestras: {results['samples']:,}<br><br>")
+            
+            # FFT
+            fft_data = results['fft']
+            content.append("<b>🔵 FFT (Fast Fourier Transform):</b><br>")
+            content.append("• <b>Identifica:</b> Contenido frecuencial promedio de toda la señal<br>")
+            content.append("• <b>Resolución temporal:</b> Ninguna (promedio global)<br>")
+            content.append("• <b>Ventaja:</b> Muy rápida, ideal para identificar bandas dominantes<br>")
+            content.append("• <b>Limitación:</b> No proporciona información temporal<br>")
+            if len(fft_data['peaks']) > 0:
+                peak_freqs = ', '.join([f"{freq:.2f}" for freq in fft_data['peak_freqs'][:5]])
+                content.append(f"• <b>Picos principales:</b> {peak_freqs} Hz<br>")
+            content.append(f"• <b>Tiempo de procesamiento:</b> {fft_data['processing_time']:.4f} segundos<br><br>")
+            
+            # STFT
+            stft_data = results['stft']
+            content.append("<b>🟢 STFT (Short-Time Fourier Transform):</b><br>")
+            content.append("• <b>Identifica:</b> Contenido frecuencial con resolución temporal fija<br>")
+            content.append("• <b>Resolución temporal:</b> Fija (ventana constante)<br>")
+            content.append("• <b>Ventana utilizada:</b> {:.1f} segundos<br>".format(stft_data['window_length']/results['fs']))
+            content.append("• <b>Ventaja:</b> Balance entre velocidad y resolución temporal<br>")
+            content.append("• <b>Limitación:</b> Resolución fija (principio de incertidumbre)<br>")
+            content.append("• <b>Ideal para:</b> Análisis de eventos transitorios<br>")
+            content.append(f"• <b>Tiempo de procesamiento:</b> {stft_data['processing_time']:.4f} segundos<br><br>")
+            
+            # CWT
+            cwt_data = results['cwt']
+            content.append("<b>🟡 CWT (Continuous Wavelet Transform):</b><br>")
+            content.append("• <b>Identifica:</b> Contenido frecuencial con resolución temporal adaptativa<br>")
+            content.append("• <b>Resolución temporal:</b> Adaptativa (cambia con la frecuencia)<br>")
+            content.append(f"• <b>Wavelet utilizada:</b> {cwt_data['wavelet']}<br>")
+            content.append(f"• <b>Escalas:</b> {len(cwt_data['scales'])} (de {cwt_data['scales'][0]:.1f} a {cwt_data['scales'][-1]:.1f})<br>")
+            content.append("• <b>Ventaja:</b> Resolución óptima para cada banda de frecuencia<br>")
+            content.append("• <b>Limitación:</b> Computacionalmente más costosa<br>")
+            content.append("• <b>Ideal para:</b> Análisis simultáneo de múltiples bandas EEG<br>")
+            content.append(f"• <b>Tiempo de procesamiento:</b> {cwt_data['processing_time']:.4f} segundos<br><br>")
+            
+            # Comparación de rendimiento
+            fft_time = fft_data['processing_time']
+            stft_time = stft_data['processing_time']
+            cwt_time = cwt_data['processing_time']
+            
+            content.append("<b>⚡ COMPARACIÓN DE RENDIMIENTO:</b><br>")
+            content.append(f"• CWT es {cwt_time/fft_time:.1f}x más lento que FFT<br>")
+            content.append(f"• CWT es {cwt_time/stft_time:.1f}x más lento que STFT<br>")
+            content.append(f"• STFT es {stft_time/fft_time:.1f}x más lento que FFT<br><br>")
+            
+            content.append("─" * 50 + "<br><br>")
+        
+        # Conclusiones generales
+        content.append("<b>🎓 CONCLUSIONES GENERALES</b><br><br>")
+        
+        content.append("<b>1. FFT - Análisis Global:</b><br>")
+        content.append("• Identifica el contenido frecuencial promedio de toda la señal<br>")
+        content.append("• Sin información temporal<br>")
+        content.append("• Útil para identificar bandas dominantes (delta, theta, alpha, beta, gamma)<br><br>")
+        
+        content.append("<b>2. STFT - Análisis Temporal Fijo:</b><br>")
+        content.append("• Identifica contenido frecuencial con resolución temporal fija<br>")
+        content.append("• Ventana fija: buena resolución temporal para frecuencias altas<br>")
+        content.append("• Limitada resolución frecuencial para frecuencias bajas<br>")
+        content.append("• Ideal para análisis de eventos transitorios<br><br>")
+        
+        content.append("<b>3. CWT - Análisis Temporal Adaptativo:</b><br>")
+        content.append("• Identifica contenido frecuencial con resolución temporal adaptativa<br>")
+        content.append("• Resolución temporal alta para frecuencias altas<br>")
+        content.append("• Resolución frecuencial alta para frecuencias bajas<br>")
+        content.append("• Mejor para análisis de diferentes bandas EEG simultáneamente<br><br>")
+        
+        content.append("<b>📋 RECOMENDACIONES DE USO:</b><br>")
+        content.append("• <b>FFT:</b> Para análisis inicial y identificación de bandas dominantes<br>")
+        content.append("• <b>STFT:</b> Para análisis de eventos transitorios y tiempo real<br>")
+        content.append("• <b>CWT:</b> Para análisis detallado de múltiples bandas EEG simultáneamente<br><br>")
+        
+        content.append("<b>🔍 INTERPRETACIÓN DE COLORES:</b><br>")
+        content.append("• <b>Azul oscuro:</b> Baja energía/magnitud<br>")
+        content.append("• <b>Amarillo:</b> Alta energía/magnitud<br>")
+        content.append("• <b>Puntos rojos:</b> Picos identificados en FFT<br>")
+        content.append("• <b>STFT (Viridis):</b> Verde = baja energía, Amarillo = alta energía<br>")
+        content.append("• <b>CWT (Plasma):</b> Púrpura = baja energía, Amarillo = alta energía<br>")
+        
+        return ''.join(content)
+    
+    def create_tabbed_dashboard_html(self, fig_graphs, fig_comments):
+        """Crear HTML con pestañas para el dashboard"""
+        
+        # Convertir figuras a HTML
+        graphs_html = fig_graphs.to_html(include_plotlyjs=False, div_id="graphs")
+        comments_html = fig_comments.to_html(include_plotlyjs=False, div_id="comments")
+        
+        # Extraer solo el contenido del div
+        import re
+        graphs_div = re.search(r'<div id="graphs"[^>]*>.*?</div>', graphs_html, re.DOTALL).group()
+        comments_div = re.search(r'<div id="comments"[^>]*>.*?</div>', comments_html, re.DOTALL).group()
+        
+        html_template = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Análisis EEG: FFT vs STFT vs CWT</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {{
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #1e1e1e;
+            color: white;
+        }}
+        
+        .header {{
+            text-align: center;
+            margin-bottom: 30px;
+        }}
+        
+        .header h1 {{
+            color: #ffffff;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }}
+        
+        .header p {{
+            color: #cccccc;
+            font-size: 16px;
+        }}
+        
+        .tabs {{
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #333;
+        }}
+        
+        .tab {{
+            padding: 15px 30px;
+            background-color: #2d2d2d;
+            border: none;
+            color: white;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            margin-right: 5px;
+            border-radius: 8px 8px 0 0;
+            transition: all 0.3s ease;
+        }}
+        
+        .tab:hover {{
+            background-color: #404040;
+        }}
+        
+        .tab.active {{
+            background-color: #007acc;
+            color: white;
+        }}
+        
+        .tab-content {{
+            display: none;
+            background-color: #1e1e1e;
+            padding: 20px;
+            border-radius: 0 8px 8px 8px;
+        }}
+        
+        .tab-content.active {{
+            display: block;
+        }}
+        
+        .graphs-container {{
+            background-color: #1e1e1e;
+        }}
+        
+        .comments-container {{
+            background-color: #1e1e1e;
+            padding: 20px;
+            line-height: 1.6;
+        }}
+        
+        .performance-summary {{
+            background-color: #2d2d2d;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }}
+        
+        .performance-summary h3 {{
+            color: #007acc;
+            margin-top: 0;
+        }}
+        
+        .performance-item {{
+            margin: 10px 0;
+            padding: 10px;
+            background-color: #333;
+            border-radius: 5px;
+        }}
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🧠 Análisis Comparativo de Señales EEG</h1>
+        <p>FFT vs STFT vs CWT - ¿Qué contenido en frecuencia identifica cada transformada?</p>
+    </div>
+    
+    <div class="tabs">
+        <button class="tab active" onclick="showTab('graphs')">📊 Gráficas</button>
+        <button class="tab" onclick="showTab('comments')">📝 Interpretación</button>
+    </div>
+    
+    <div id="graphs" class="tab-content active">
+        <div class="graphs-container">
+            {graphs_div}
+        </div>
+        
+        <div class="performance-summary">
+            <h3>⚡ Resumen de Rendimiento</h3>
+            <div class="performance-item">
+                <strong>FileEEG:</strong> CWT es 60x más lento que FFT, 466x más lento que STFT
+            </div>
+            <div class="performance-item">
+                <strong>sEEG:</strong> CWT es 209x más lento que FFT, 352x más lento que STFT
+            </div>
+            <div class="performance-item">
+                <strong>Conclusión:</strong> FFT es la más rápida, CWT la más lenta pero con mejor resolución
+            </div>
+        </div>
+    </div>
+    
+    <div id="comments" class="tab-content">
+        <div class="comments-container">
+            {comments_div}
+        </div>
+    </div>
+    
+    <script>
+        function showTab(tabName) {{
+            // Ocultar todas las pestañas
+            const tabs = document.querySelectorAll('.tab-content');
+            tabs.forEach(tab => tab.classList.remove('active'));
+            
+            // Remover clase active de todos los botones
+            const buttons = document.querySelectorAll('.tab');
+            buttons.forEach(button => button.classList.remove('active'));
+            
+            // Mostrar la pestaña seleccionada
+            document.getElementById(tabName).classList.add('active');
+            
+            // Agregar clase active al botón correspondiente
+            event.target.classList.add('active');
+            
+            // Redimensionar gráficas si es necesario
+            if (tabName === 'graphs') {{
+                setTimeout(() => {{
+                    window.dispatchEvent(new Event('resize'));
+                }}, 100);
+            }}
+        }}
+        
+        // Redimensionar gráficas cuando cambie el tamaño de la ventana
+        window.addEventListener('resize', function() {{
+            if (document.getElementById('graphs').classList.contains('active')) {{
+                window.dispatchEvent(new Event('resize'));
+            }}
+        }});
+    </script>
+</body>
+</html>
+        """
+        
+        return html_template
     
     def generate_analysis_report(self):
         """Generar reporte de análisis"""
