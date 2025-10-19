@@ -8,18 +8,18 @@ Este proyecto realiza un análisis comparativo de señales electroencefalográfi
 
 ## 📊 Dashboards Disponibles
 
-### 🎯 [Dashboard Principal](https://tu-usuario.github.io/tu-repositorio/)
+### 🎯 [Dashboard Principal](https://felirangelp.github.io/analisis_de_senales_EEG_FTT_vs_STFT_vs_CWT/)
 Página principal con pestañas que integra ambos dashboards:
 - **Pestaña Gráficas**: Visualizaciones interactivas de las transformadas
 - **Pestaña Interpretación**: Análisis detallado y comentarios interpretativos
 
-### 📈 [Gráficas Interactivas](https://tu-usuario.github.io/tu-repositorio/dashboard.html)
+### 📈 [Gráficas Interactivas](https://felirangelp.github.io/analisis_de_senales_EEG_FTT_vs_STFT_vs_CWT/dashboard.html)
 Dashboard enfocado únicamente en las visualizaciones:
 - Gráficas de FFT con picos identificados
 - Espectrogramas STFT con mapa de colores viridis
 - Escalogramas CWT con mapa de colores plasma
 
-### 📝 [Interpretación Detallada](https://tu-usuario.github.io/tu-repositorio/dashboard_interpretaciones.html)
+### 📝 [Interpretación Detallada](https://felirangelp.github.io/analisis_de_senales_EEG_FTT_vs_STFT_vs_CWT/dashboard_interpretaciones.html)
 Dashboard con análisis interpretativo completo:
 - Características de cada transformada
 - Comparación de rendimiento computacional
@@ -35,8 +35,8 @@ Dashboard con análisis interpretativo completo:
 ### Instalación
 ```bash
 # Clonar el repositorio
-git clone https://github.com/tu-usuario/tu-repositorio.git
-cd tu-repositorio
+git clone https://github.com/felirangelp/analisis_de_senales_EEG_FTT_vs_STFT_vs_CWT.git
+cd analisis_de_senales_EEG_FTT_vs_STFT_vs_CWT
 
 # Crear ambiente virtual
 python -m venv venv
