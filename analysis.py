@@ -313,13 +313,18 @@ class EEGAnalyzer:
                     row=row, col=1
                 )
             
-            # STFT - Espectrograma
+            # STFT - Espectrograma (reducir resolución para archivo más pequeño)
             stft_data = results['stft']
+            # Reducir resolución tomando cada 4to punto
+            z_reduced = stft_data['magnitude'][::4, ::4]
+            x_reduced = stft_data['times'][::4]
+            y_reduced = stft_data['frequencies'][::4]
+            
             fig.add_trace(
                 go.Heatmap(
-                    z=stft_data['magnitude'],
-                    x=stft_data['times'],
-                    y=stft_data['frequencies'],
+                    z=z_reduced,
+                    x=x_reduced,
+                    y=y_reduced,
                     colorscale='Viridis',
                     name=f'{signal_name} STFT',
                     hovertemplate='Tiempo: %{x:.2f}s<br>Frecuencia: %{y:.2f} Hz<br>Magnitud: %{z:.2f}<extra></extra>'
@@ -327,13 +332,18 @@ class EEGAnalyzer:
                 row=row, col=2
             )
             
-            # CWT - Escalograma
+            # CWT - Escalograma (reducir resolución para archivo más pequeño)
             cwt_data = results['cwt']
+            # Reducir resolución tomando cada 4to punto
+            z_reduced = cwt_data['magnitude'][::4, ::4]
+            x_reduced = np.arange(len(cwt_data['magnitude'][0]))[::4] / fs
+            y_reduced = cwt_data['frequencies'][::4]
+            
             fig.add_trace(
                 go.Heatmap(
-                    z=cwt_data['magnitude'],
-                    x=np.arange(len(cwt_data['magnitude'][0])) / fs,
-                    y=cwt_data['frequencies'],
+                    z=z_reduced,
+                    x=x_reduced,
+                    y=y_reduced,
                     colorscale='Plasma',
                     name=f'{signal_name} CWT',
                     hovertemplate='Tiempo: %{x:.2f}s<br>Frecuencia: %{y:.2f} Hz<br>Magnitud: %{z:.2f}<extra></extra>'
