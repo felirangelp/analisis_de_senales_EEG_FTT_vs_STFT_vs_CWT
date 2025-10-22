@@ -373,13 +373,13 @@ class EEGAnalyzer:
             fig.update_xaxes(title_text="Frecuencia (Hz)", row=i+1, col=1)
             fig.update_yaxes(title_text="Magnitud", row=i+1, col=1)
             
-            # STFT
+            # STFT - Escala logarítmica en Y (frecuencia)
             fig.update_xaxes(title_text="Tiempo (s)", row=i+1, col=2)
-            fig.update_yaxes(title_text="Frecuencia (Hz)", row=i+1, col=2)
+            fig.update_yaxes(title_text="Frecuencia (Hz)", row=i+1, col=2, type="log")
             
-            # CWT
+            # CWT - Escala logarítmica en Y (frecuencia)
             fig.update_xaxes(title_text="Tiempo (s)", row=i+1, col=3)
-            fig.update_yaxes(title_text="Frecuencia (Hz)", row=i+1, col=3)
+            fig.update_yaxes(title_text="Frecuencia (Hz)", row=i+1, col=3, type="log")
         
         # Sin anotaciones - solo gráficas limpias
         
